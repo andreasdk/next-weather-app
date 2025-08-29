@@ -1,8 +1,9 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { WeatherData } from "@/types";
 
 type CacheEntry = {
-  data: any;
+  data: WeatherData;
   timestamp: number;
 };
 
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest) {
   if (!res.ok)
     return NextResponse.json({ error: "City not found" }, { status: 404 });
 
-  const data = await res.json();
+  const data: WeatherData = await res.json();
   cache[key] = { data, timestamp: Date.now() };
 
   return NextResponse.json(data);
