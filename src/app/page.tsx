@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { WeatherData } from "@/types";
+import WeatherCard from "./components/WeatherCard";
 
 export default function Home() {
   const [city, setCity] = useState("");
@@ -18,9 +19,12 @@ export default function Home() {
       if (!res.ok) throw new Error("City not found");
       const data: WeatherData = await res.json();
       setWeather(data);
-    } catch (err: any) {
-      setError(err.message);
-      setWeather(null);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Unknown error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -40,11 +44,12 @@ export default function Home() {
           placeholder="Enter city"
           value={city}
           onChange={(e) => setCity(e.target.value)}
-          className="px-3 py-2 rounded-xl border border-orange-600 text-slate-900 focus:outline-none focus:ring-3 focus:ring-blue-600"
+          className="px-3 py-2 rounded-xl border border-orange-600 text-slate-900 focus:outline-none focus:ring-3 focus:ring-orange-500 transition"
         />
+
         <button
           onClick={fetchWeather}
-          className="px-4 py-2 bg-orange-600 text-white rounded-xl shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-800 transition"
+          className="px-4 py-2 bg-orange-600 text-white rounded-xl shadow hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-800 transition"
         >
           Search
         </button>
@@ -53,31 +58,7 @@ export default function Home() {
       {loading && <p className="text-amber-600">Loading...</p>}
       {error && <p className="text-red-600">{error}</p>}
 
-      {weather && (
-        <section
-          aria-live="polite"
-          className="bg-white rounded-2xl shadow p-6 text-center w-80"
-        >
-          <h2 className="text-xl font-semibold text-slate-900">
-            {weather.name}
-          </h2>
-          <img
-            src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
-            alt={weather.weather[0].description}
-            className="mx-auto"
-          />
-          <p className="text-2xl text-slate-900">
-            {Math.round(weather.main.temp)}°C
-          </p>
-          <p className="capitalize text-slate-700">
-            {weather.weather[0].description}
-          </p>
-          <p className="text-sm text-slate-600">
-            Feels like: {Math.round(weather.main.feels_like)}°C | Humidity:{" "}
-            {weather.main.humidity}%
-          </p>
-        </section>
-      )}
+      {weather && <WeatherCard weather={weather} />}
     </main>
   );
 }
